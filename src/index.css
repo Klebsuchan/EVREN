@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: 'Archivo Black', 'Outfit', sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: #0B0B0D;
+    color: #F8FAFC;
+    font-family: var(--font-sans);
+  }
+
+  body {
+    overflow-x: hidden;
+    background-color: #0B0B0D;
+    color: #F8FAFC;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+  }
+
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  .font-mono-num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Subtle paper & studio grid texture matching MODELO.jfif */
+.bg-grid-texture-dark {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.bg-grid-texture-light {
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 26s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0B0D;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272A;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D91118;
+}
