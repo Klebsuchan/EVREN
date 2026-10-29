@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Play, Volume2, VolumeX } from 'lucide-react';
+import { motion } from 'motion/react';
 import { COMPANY_INFO, VIDEO_REELS } from '../data/evrenData.ts';
 import { TornPaperEdge } from './TornPaperEdge.tsx';
+import { useResponsiveParallax, useCardTilt } from '../hooks/useParallax.ts';
 
 interface HeroSectionProps {
   onSelectPromoScroll: () => void;
@@ -16,6 +18,7 @@ interface HeroSectionProps {
  * - Bottom-left stacked-tab framed card ("ESTÚDIO & EVENTOS" + white footer strip)
  * - Bottom-right giant numeric counter ("EM ______ 10 ÁREAS CRIATIVAS")
  * - Torn paper bottom edge transitioning to #EFEFEF
+ * - Optimized with GPU-accelerated multi-layer parallax for desktop & mobile
  */
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onSelectPromoScroll,
@@ -23,11 +26,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Parallax layers with responsive bounds (0.45x on mobile, 1.0x on desktop, 0x on reduced motion)
+  const { y: yBg } = useResponsiveParallax([-30, 30], sectionRef);
+  const { y: yHeadline } = useResponsiveParallax([-15, 20], sectionRef);
+  const { y: yVideo } = useResponsiveParallax([18, -22], sectionRef);
+  const { y: yLeftCard } = useResponsiveParallax([12, -15], sectionRef);
+  const { y: yCounter } = useResponsiveParallax([-10, 16], sectionRef);
+
+  // 3D Tilt for bottom-left featured card
+  const leftCardTilt = useCardTilt(5);
 
   const currentVideo = VIDEO_REELS[activeVideoIndex];
 
   return (
     <section
+      ref={sectionRef}
       id="topo"
       className="relative overflow-hidden text-white select-none"
       style={{
@@ -35,14 +50,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           'radial-gradient(circle at 58% 42%, #FF2A2A 0%, #D91118 42%, #8A070C 78%, #4A0306 100%)'
       }}
     >
-      {/* Subtle studio grid texture overlay */}
-      <div className="absolute inset-0 bg-grid-texture-dark pointer-events-none" />
+      {/* Subtle studio grid texture overlay with parallax drift */}
+      <motion.div
+        style={{ y: yBg }}
+        className="absolute inset-0 bg-grid-texture-dark pointer-events-none will-change-transform scale-105"
+      />
 
       <div className="relative z-10 max-w-[1440px] mx-auto px-5 sm:px-8 md:px-12 pt-8 pb-14 md:pt-12 md:pb-20">
         {/* Top Staggered Display Headline + Center Stage */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left / Top Staggered Headline ("STRENGTH / STARTS / HERE" -> "IMPACTO / COMEÇA / AQUI") */}
-          <div className="lg:col-span-7 z-20">
+          <motion.div style={{ y: yHeadline }} className="lg:col-span-7 z-20 will-change-transform">
             <h1 className="font-display uppercase text-white leading-[0.92] tracking-tight">
               <span className="block text-[44px] sm:text-[68px] xl:text-[86px]">
                 IMPACTO
@@ -64,7 +82,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               . Design gráfico, identidade corporativa, produção de vídeo, cobertura fotográfica e
               impressão de grandes formatos.
             </p>
-          </div>
+          </motion.div>
 
           {/* Right-of-Center Floating Promo Callout + White Pill CTA (matching MODELO.jfif) */}
           <div className="lg:col-span-5 lg:pt-12 flex flex-col items-start lg:items-start lg:pl-8 z-20 space-y-4">
@@ -101,8 +119,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* Centerpiece Visual Stage + Bottom-Left Framed Box + Bottom-Right Counter */}
         <div className="mt-8 md:mt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
           {/* Bottom-Left Framed Card matching MODELO.jfif "DISCIPLINE / STAY CONSISTENT" box */}
-          <div className="lg:col-span-4 order-2 lg:order-1">
-            <div className="max-w-[310px] mx-auto lg:mx-0">
+          <motion.div
+            style={{ y: yLeftCard }}
+            className="lg:col-span-4 order-2 lg:order-1 will-change-transform"
+          >
+            <div
+              onMouseMove={leftCardTilt.onMouseMove}
+              onMouseLeave={leftCardTilt.onMouseLeave}
+              style={{
+                transform: `perspective(800px) rotateX(${leftCardTilt.rotateX}deg) rotateY(${leftCardTilt.rotateY}deg)`,
+                transition: 'transform 0.15s ease-out'
+              }}
+              className="max-w-[310px] mx-auto lg:mx-0"
+            >
               {/* Stacked top card tabs effect from MODELO.jfif */}
               <div className="mx-3 h-1.5 bg-white/40 border-t border-x border-white/70" />
               <div className="mx-1.5 h-1.5 bg-white/70 border-t border-x border-white" />
@@ -145,10 +174,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Center Dynamic Video Showreel Stage (7 Real Videos Switcher) */}
-          <div className="lg:col-span-5 order-1 lg:order-2">
+          <motion.div
+            style={{ y: yVideo }}
+            className="lg:col-span-5 order-1 lg:order-2 will-change-transform"
+          >
             <div className="rounded-xl overflow-hidden border-2 border-white/80 bg-[#0B0B0D] shadow-[0_25px_70px_rgba(0,0,0,0.65)]">
               <div className="px-4 py-2.5 bg-[#111111] border-b border-white/15 flex items-center justify-between gap-2">
                 <span className="text-[11px] font-extrabold uppercase tracking-wider text-white truncate">
@@ -211,10 +243,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 })}
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Bottom-Right Giant Stat Counter matching MODELO.jfif "AT ______ 12 LOCATIONS" */}
-          <div className="lg:col-span-3 order-3 flex flex-col justify-end">
+          <motion.div
+            style={{ y: yCounter }}
+            className="lg:col-span-3 order-3 flex flex-col justify-end will-change-transform"
+          >
             <div className="flex items-baseline justify-between lg:justify-end gap-3 border-b border-white/40 pb-2">
               <span className="font-display text-sm sm:text-base uppercase tracking-wider text-white">
                 EM
@@ -233,7 +268,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <span>MARCAÇÃO: {COMPANY_INFO.contacts.primaryPhone}</span>
               <span>{COMPANY_INFO.contacts.secondaryPhone}</span>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 

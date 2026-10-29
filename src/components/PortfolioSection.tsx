@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Maximize2, Play, Search, Film, Grid } from 'lucide-react';
+import { motion } from 'motion/react';
 import {
   PORTFOLIO_ITEMS,
   PortfolioItem,
@@ -7,6 +8,7 @@ import {
   COMPLETE_ARCHIVE_PHOTOS
 } from '../data/evrenData.ts';
 import { filterPortfolioItems } from '../utils/pricing.ts';
+import { useResponsiveParallax } from '../hooks/useParallax.ts';
 
 interface PortfolioSectionProps {
   onOpenLightbox: (item: PortfolioItem) => void;
@@ -71,12 +73,25 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
 
   const filteredItems = filterPortfolioItems(PORTFOLIO_ITEMS, selectedCategory, searchQuery);
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const { y: yWatermark } = useResponsiveParallax([-30, 30], sectionRef);
+  const { y: yPlayer } = useResponsiveParallax([16, -16], sectionRef);
+
   return (
     <section
+      ref={sectionRef}
       id="portfolio"
-      className="py-20 md:py-28 bg-[#0B0B0D] text-white border-t border-white/10 bg-grid-texture-dark"
+      className="relative py-20 md:py-28 bg-[#0B0B0D] text-white border-t border-white/10 bg-grid-texture-dark overflow-hidden"
     >
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 md:px-12 space-y-20">
+      {/* Subtle Floating Watermark in Background with Parallax */}
+      <motion.div
+        style={{ y: yWatermark }}
+        className="absolute top-10 right-6 md:right-16 text-[60px] sm:text-[100px] lg:text-[140px] font-display font-black text-white/[0.03] select-none pointer-events-none will-change-transform"
+      >
+        CINEMA & DESIGN
+      </motion.div>
+
+      <div className="relative z-10 max-w-[1440px] mx-auto px-5 sm:px-8 md:px-12 space-y-20">
         {/* PART 1: 7-VIDEO CINEMA & SHOWREEL GALLERY */}
         <div className="space-y-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -95,8 +110,11 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Main Video Player */}
-            <div className="lg:col-span-7 bg-[#141418] border-2 border-white/20 overflow-hidden shadow-2xl">
+            {/* Main Video Player with Parallax */}
+            <motion.div
+              style={{ y: yPlayer }}
+              className="lg:col-span-7 bg-[#141418] border-2 border-white/20 overflow-hidden shadow-2xl will-change-transform"
+            >
               <div className="aspect-video bg-black">
                 <video
                   key={activeVideo.src}
@@ -116,7 +134,7 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
                 </h3>
                 <p className="text-xs sm:text-sm text-neutral-700 mt-1">{activeVideo.description}</p>
               </div>
-            </div>
+            </motion.div>
 
             {/* 7-Video Playlist */}
             <div className="lg:col-span-5 space-y-2">

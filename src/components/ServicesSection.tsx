@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ArrowUpRight, Check, Layers, Maximize2, FileText, Download } from 'lucide-react';
+import { motion } from 'motion/react';
 import {
   COMPANY_INFO,
   FANNED_CHOOSE_US_CARDS,
@@ -7,6 +8,7 @@ import {
   ServiceItem
 } from '../data/evrenData.ts';
 import { TornPaperEdge } from './TornPaperEdge.tsx';
+import { useResponsiveParallax, useCardTilt } from '../hooks/useParallax.ts';
 
 interface ServicesSectionProps {
   onSelectServiceForQuote: (serviceId: string) => void;
@@ -37,8 +39,13 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
     }
   };
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const { y: yWatermark } = useResponsiveParallax([-35, 35], sectionRef);
+  const { y: ySlides } = useResponsiveParallax([18, -18], sectionRef);
+
   return (
     <section
+      ref={sectionRef}
       id="servicos"
       className="relative bg-[#EFEFEF] text-[#111111] bg-grid-texture-light pt-8 md:pt-14 overflow-hidden"
     >
@@ -54,14 +61,17 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
             <span className="w-24 sm:w-44 h-px bg-neutral-300" />
           </div>
 
-          {/* Giant Light-Gray Background Watermark Text */}
-          <div className="text-center select-none pointer-events-none">
+          {/* Giant Light-Gray Background Watermark Text with Parallax Drift */}
+          <motion.div
+            style={{ y: yWatermark }}
+            className="text-center select-none pointer-events-none will-change-transform"
+          >
             <h2 className="font-display uppercase text-[#D5D5D5] text-[38px] sm:text-[68px] md:text-[88px] lg:text-[108px] leading-[0.9] tracking-tight">
               POR QUE ESCOLHEM
               <br />
               A EVREN STUDIO
             </h2>
-          </div>
+          </motion.div>
 
           {/* DESKTOP FANNED / TILTED OVERLAPPING CARDS DECK */}
           <div className="hidden lg:flex items-center justify-center -mt-10 xl:-mt-14 pt-6 pb-14 px-4">
@@ -228,8 +238,11 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
             </div>
           </div>
 
-          {/* Official Slides Preview on the Right */}
-          <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Official Slides Preview on the Right with subtle parallax */}
+          <motion.div
+            style={{ y: ySlides }}
+            className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4 will-change-transform"
+          >
             <div
               onClick={() =>
                 onOpenLightboxImage(
@@ -271,7 +284,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                 <Maximize2 className="w-3.5 h-3.5 text-[#D91118]" />
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* PART 3: INTERACTIVE 10-SERVICE INDEX & DELIVERABLES */}

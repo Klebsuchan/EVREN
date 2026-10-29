@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Check, Eye } from 'lucide-react';
+import { motion } from 'motion/react';
 import { PROMO_PACKAGES, PackageTier } from '../data/evrenData.ts';
 import {
   formatKwanza,
   calculatePackageSavings,
   filterPackagesByCategory
 } from '../utils/pricing.ts';
+import { useResponsiveParallax, useCardTilt } from '../hooks/useParallax.ts';
 
 interface PackagesSectionProps {
   onSelectPackageForBooking: (packageId: string) => void;
@@ -73,8 +75,15 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
   const currentTabMeta =
     categoryTabs.find((tab) => tab.id === selectedCategory) || categoryTabs[0];
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const { y: yLeftPanel } = useResponsiveParallax([-20, 20], sectionRef);
+  const { y: yRightPanel } = useResponsiveParallax([20, -20], sectionRef);
+  const { y: yCenterCard } = useResponsiveParallax([10, -10], sectionRef);
+  const centerCardTilt = useCardTilt(4);
+
   return (
     <section
+      ref={sectionRef}
       id="pacotes"
       className="relative bg-[#0B0B0D] text-white bg-grid-texture-dark pt-14 pb-8 overflow-hidden"
     >
@@ -103,8 +112,9 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
 
             {/* 3-Column Stage matching MODELO.jfif bottom section */}
             <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-              {/* Left Monochrome Image Frame */}
-              <div
+              {/* Left Monochrome Image Frame with Parallax */}
+              <motion.div
+                style={{ y: yLeftPanel }}
                 onClick={() =>
                   onOpenLightboxImage(
                     activeCarouselPkg.showcaseLeftImage,
@@ -112,7 +122,7 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
                     activeCarouselPkg.name
                   )
                 }
-                className="hidden lg:block lg:col-span-3 h-[340px] overflow-hidden bg-neutral-900 border border-white/15 cursor-pointer group relative"
+                className="hidden lg:block lg:col-span-3 h-[340px] overflow-hidden bg-neutral-900 border border-white/15 cursor-pointer group relative will-change-transform"
               >
                 <img
                   src={activeCarouselPkg.showcaseLeftImage}
@@ -124,10 +134,22 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
                     EVREN STUDIO · {activeCarouselPkg.categoryLabel}
                   </span>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Center Crisp White Split Card (matching MODELO.jfif "START PACK / GET STARTED" white card) */}
-              <div className="lg:col-span-6 bg-white text-[#111111] p-5 sm:p-6 shadow-[0_25px_70px_rgba(0,0,0,0.8)] border-2 border-white">
+              <motion.div
+                style={{ y: yCenterCard }}
+                className="lg:col-span-6 will-change-transform"
+              >
+                <div
+                  onMouseMove={centerCardTilt.onMouseMove}
+                  onMouseLeave={centerCardTilt.onMouseLeave}
+                  style={{
+                    transform: `perspective(800px) rotateX(${centerCardTilt.rotateX}deg) rotateY(${centerCardTilt.rotateY}deg)`,
+                    transition: 'transform 0.15s ease-out'
+                  }}
+                  className="bg-white text-[#111111] p-5 sm:p-6 shadow-[0_25px_70px_rgba(0,0,0,0.8)] border-2 border-white"
+                >
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-stretch">
                   {/* Left half of White Card: Photo + Brand Caption + Huge Pack Name at Bottom */}
                   <div className="sm:col-span-6 flex flex-col justify-between">
@@ -208,9 +230,11 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
                   </div>
                 </div>
               </div>
+              </motion.div>
 
-              {/* Right Monochrome Image Frame */}
-              <div
+              {/* Right Monochrome Image Frame with Parallax */}
+              <motion.div
+                style={{ y: yRightPanel }}
                 onClick={() =>
                   onOpenLightboxImage(
                     activeCarouselPkg.showcaseRightImage,
@@ -218,7 +242,7 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
                     activeCarouselPkg.name
                   )
                 }
-                className="hidden lg:block lg:col-span-3 h-[340px] overflow-hidden bg-neutral-900 border border-white/15 cursor-pointer group relative"
+                className="hidden lg:block lg:col-span-3 h-[340px] overflow-hidden bg-neutral-900 border border-white/15 cursor-pointer group relative will-change-transform"
               >
                 <img
                   src={activeCarouselPkg.showcaseRightImage}
@@ -230,7 +254,7 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
                     VER CARTAZ OFICIAL →
                   </span>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Right Arrow */}
